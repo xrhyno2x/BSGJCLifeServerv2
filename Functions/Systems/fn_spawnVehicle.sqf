@@ -28,7 +28,7 @@ serv_sv_use pushBack _vid;
 
 private _servIndex = serv_sv_use find _vid;
 
-private _query = format ["SELECT id, side, classname, type, pid, alive, active, plate, color, inventory, gear, fuel, damage, blacklist FROM vehicles WHERE id='%1' AND pid='%2'",_vid,_pid];
+private _query = format["SELECT id, side, classname, type, pid, alive, active, plate, color, inventory, gear, fuel, damage, blacklist, insure FROM vehicles WHERE id='%1' AND pid='%2'",_vid,_pid];
 
 private _tickTime = diag_tickTime;
 private _queryResult = [_query,2] call DB_fnc_asyncCall;
@@ -104,32 +104,32 @@ _vehicle lock 2;
 //Reskin the vehicle
 [_vehicle,(_vInfo select 8)] remoteExecCall ["life_fnc_colorVehicle",_unit];
 _vehicle setVariable ["vehicle_info_owners",[[_pid,_name]],true];
-_vehicle setVariable ["dbInfo",[(_vInfo select 4),(_vInfo select 7)],true];
+_vehicle setVariable ["dbInfo",[(_vInfo select 4),(_vInfo select 7),(_vInfo select 14)],true];
 _vehicle disableTIEquipment true; //No Thermals.. They're cheap but addictive.
 [_vehicle] call life_fnc_clearVehicleAmmo;
 
 if (LIFE_SETTINGS(getNumber,"save_vehicle_virtualItems") isEqualTo 1) then {
 
     _vehicle setVariable ["Trunk",_trunk,true];
-    
+
     if (_wasIllegal) then {
         private _refPoint = if (_sp isEqualType "") then {getMarkerPos _sp;} else {_sp;};
-        
+
         private _distance = 100000;
         private "_location";
 
         {
             private _tempLocation = nearestLocation [_refPoint, _x];
             private _tempDistance = _refPoint distance _tempLocation;
-    
+
             if (_tempDistance < _distance) then {
                 _location = _tempLocation;
                 _distance = _tempDistance;
             };
             false
-    
+
         } count ["NameCityCapital", "NameCity", "NameVillage"];
- 
+
         _location = text _location;
         [1,"STR_NOTF_BlackListedVehicle",true,[_location,_name]] remoteExecCall ["life_fnc_broadcast",west];
 
@@ -187,5 +187,9 @@ if ((_vInfo select 1) isEqualTo "med" && (_vInfo select 2) isEqualTo "C_Offroad_
     [_vehicle,"med_offroad",true] remoteExecCall ["life_fnc_vehicleAnimate",_unit];
 };
 
-[1,_spawntext] remoteExecCall ["life_fnc_broadcast",_unit];
+if ((_vInfo select 14) isEqualTo 1) then {
+[ 1 , "Your vehicle is available and it is assured!" ] RemoteExecCall [ "life_fnc_broadcast" , _unit];
+}else{
+[ 1 , "Your vehicle is available but is not insured!" ] RemoteExecCall [ "life_fnc_broadcast" , _unit];
+};
 serv_sv_use deleteAt _servIndex;
