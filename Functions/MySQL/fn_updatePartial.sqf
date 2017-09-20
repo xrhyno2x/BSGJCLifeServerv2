@@ -24,7 +24,11 @@ switch (_mode) do {
     case 1: {
         _value = [_this,2,0,[0]] call BIS_fnc_param;
         _value = [_value] call DB_fnc_numberSafe;
-        _query = format ["UPDATE players SET bankacc='%1' WHERE pid='%2'",_value,_uid];
+        switch (_side) do {
+            case west: {_query = format ["UPDATE players SET westbankacc='%1' WHERE pid='%2'",_value,_uid];};
+            case civilian: {_query = format ["UPDATE players SET bankacc='%1' WHERE pid='%2'",_value,_uid];};
+            case independent: {_query = format ["UPDATE players SET bankacc='%1' WHERE pid='%2'",_value,_uid];};
+        };
     };
 
     case 2: {
@@ -72,7 +76,9 @@ switch (_mode) do {
         _value2 = [_this,4,0,[0]] call BIS_fnc_param;
         _value1 = [_value1] call DB_fnc_numberSafe;
         _value2 = [_value2] call DB_fnc_numberSafe;
-        _query = format ["UPDATE players SET cash='%1', bankacc='%2' WHERE pid='%3'",_value1,_value2,_uid];
+        case west: {_query = format ["UPDATE players SET westcash='%1', westbankacc='%2' WHERE pid='%3'",_value,_value2,_uid];};
+        case civilian: {_query = format ["UPDATE players SET cash='%1', bankacc='%2' WHERE pid='%3'",_value,_value2,_uid];};
+        case independent: {_query = format ["UPDATE players SET cash='%1', bankacc='%2' WHERE pid='%3'",_value,_value2,_uid];};
     };
 
     case 7: {
